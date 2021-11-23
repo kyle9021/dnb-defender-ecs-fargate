@@ -9,7 +9,6 @@ ram_units         = 512
 task_group_family = "dnb-family"
 cidr_bit_offset   = 248
 container_port    = 80 
-container_pc_defender_port    = 81 
 https_enabled     = true
 env_name          = "prisma" 
 environment       = [

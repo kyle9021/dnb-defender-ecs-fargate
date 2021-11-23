@@ -58,11 +58,6 @@ variable "container_port" {
   description = "Container port for the container"
 }
 
-variable "container_pc_defender_port" {
-  type        = number
-  description = "Container port for the container"
-}
-
 variable "https_enabled" {
   type        = bool
   description = "Is Https enabled? Certifcate arn needs to be set if this is true"
