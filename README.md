@@ -23,14 +23,14 @@ Terraform module that creates the following to make a fargate cluster:
 ##  Setup and Deployment 
 
 - Step 1; Go to Prisma console, Manage-Defenders-Deploy->Single Defender. 
-        - In field 3 select 'Container Defender - App-Embedded'.
-        - In field 4 select 'Fargate task'.
-        - Copy the content of file **pc-defender-fargate-orig.json** and paste it in the left-hand box.
-        - Click **Generate Protected Task** button to generate the protected task definition.
-        - Copy the generated task definition and use it to replace the content of file **pc-defender-fargate.json**.
+        * In field 3 select 'Container Defender - App-Embedded'.
+        * In field 4 select 'Fargate task'.
+        * Copy the content of file **pc-defender-fargate-orig.json** and paste it in the left-hand box.
+        * Click **Generate Protected Task** button to generate the protected task definition.
+        * Copy the generated task definition and use it to replace the content of file **pc-defender-fargate.json**.
 
 - Step 2: Update **dnb.tfvars** file with appropriate vpc_id, public_subnet_ids and private_subnet_ids.  
 - Step 3: Run
-        - terraform init
-        - terraform plan --var-file=dnb.tfvars 
-        - terraform apply --var-file=dnb.tfvars 
+        * terraform init
+        * terraform plan --var-file=dnb.tfvars 
+        * terraform apply --var-file=dnb.tfvars 
