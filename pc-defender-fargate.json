@@ -1,0 +1,87 @@
+[
+    {
+      "dependsOn": [
+        {
+          "condition": "START",
+          "containerName": "TwistlockDefender"
+        }
+      ],
+      "entryPoint": [
+        "/var/lib/twistlock/fargate/fargate_defender.sh",
+        "fargate",
+        "entrypoint",
+        "/main.sh"
+      ],
+      "environment": [
+        {
+          "name": "TW_IMAGE_NAME",
+          "value": "vulnerables/web-dvwa"
+        },
+        {
+          "name": "TW_CONTAINER_NAME",
+          "value": "prisma-dvwa-fargate"
+        },
+        {
+          "name": "DEFENDER_TYPE",
+          "value": "fargate"
+        },
+        {
+          "name": "FARGATE_TASK",
+          "value": "prisma-dvwa-fargate"
+        }
+      ],
+      "image": "vulnerables/web-dvwa",
+      "linuxParameters": {
+        "capabilities": {
+          "add": [
+            "SYS_PTRACE"
+          ]
+        }
+      },
+      "name": "prisma-dvwa-fargate",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "volumesFrom": [
+        {
+          "readOnly": false,
+          "sourceContainer": "TwistlockDefender"
+        }
+      ]
+    },
+    {
+      "entryPoint": [
+        "/usr/local/bin/defender",
+        "fargate",
+        "sidecar"
+      ],
+      "environment": [
+        {
+          "name": "INSTALL_BUNDLE",
+          "value": "eyJzZWNyZXRzIjp7InNlcnZpY2UtcGFyYW1ldGVyIjoibytubG1RbmNmaGd3eUtUcEl6d05wUVZqcCt6dmY0R1lrVHBMWlFCV0s5amZDNUphNkk1T29KRDRqZHBtcW1qWXlWbVlyR1NBSUNFVTMwVmh2cVIraVE9PSJ9LCJnbG9iYWxQcm94eU9wdCI6eyJodHRwUHJveHkiOiIiLCJub1Byb3h5IjoiIiwiY2EiOiIiLCJ1c2VyIjoiIiwicGFzc3dvcmQiOnsiZW5jcnlwdGVkIjoiIn19LCJjdXN0b21lcklEIjoidXMtMi0xNTgzMjExMTciLCJhcGlLZXkiOiJLekpxUjhZM3pMWlFIbGNkVTk3cUVFR3cxU0RsTEVkNVM3dUZUekx4OUdhNHRjZWdkUmJXazB1YWk3OGpqZXFHQVVoTExKb2hHNzlNYmtHSm9QTGRmQT09IiwibWljcm9zZWdDb21wYXRpYmxlIjpmYWxzZX0="
+        },
+        {
+          "name": "DEFENDER_TYPE",
+          "value": "fargate"
+        },
+        {
+          "name": "FARGATE_TASK",
+          "value": "prisma-dvwa-fargate"
+        },
+        {
+          "name": "WS_ADDRESS",
+          "value": "wss://us-east1.cloud.twistlock.com:443"
+        }
+      ],
+      "essential": false,
+      "image": "registry-auth.twistlock.com/tw_suykjms1nbiihk8kl1ixmvbqmw32hayo/twistlock/defender:defender_21_08_525",
+      "logConfiguration": null,
+      "name": "TwistlockDefender",
+      "portMappings": []
+    }
+]
+

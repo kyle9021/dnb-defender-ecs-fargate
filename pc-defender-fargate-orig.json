@@ -1,0 +1,23 @@
+{
+   "containerDefinitions": [ 
+{
+      "entryPoint": [
+            "/main.sh"
+      ],
+      "name": "prisma-dvwa-fargate",
+      "image": "vulnerables/web-dvwa",
+      "portMappings": [
+         {
+            "containerPort": 80,
+            "hostPort": 80,
+            "protocol": "tcp"
+         }
+      ]
+  }
+],
+ "family": "fargate-task-definition",
+  "requiresCompatibilities": [ 
+         "FARGATE" 
+     ]
+}
+
