@@ -25,8 +25,11 @@ resource "aws_security_group" "alb" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"] 
+    cidr_blocks = ["0.0.0.0/0"]
     self        = true
+  }
+  tags = {
+    yor_trace = "7fb8a0f4-b1c9-4620-a84b-c36269a29ea0"
   }
 }
 
@@ -36,7 +39,7 @@ resource "aws_security_group_rule" "tcp_443" {
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"] 
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb.id
 }
 
@@ -48,7 +51,7 @@ resource "aws_security_group_rule" "tcp_80" {
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"] 
+  cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb.id
 }
 
@@ -96,8 +99,11 @@ resource "aws_security_group" "fargate_ecs" {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"] 
+    cidr_blocks = ["0.0.0.0/0"]
     self        = true
+  }
+  tags = {
+    yor_trace = "ebcfa9ce-f823-453f-bdbe-aab14e218da2"
   }
 }
 
@@ -108,7 +114,7 @@ resource "aws_security_group" "fargate_ecs" {
 resource "aws_alb" "fargate" {
   count           = local.nat_enabled ? 0 : 1
   name            = "${var.env_name}-${var.app_name}-alb"
-  subnets         = var.public_subnet_ids 
+  subnets         = var.public_subnet_ids
   security_groups = [aws_security_group.alb.id]
 
   //access_logs {
@@ -118,6 +124,9 @@ resource "aws_alb" "fargate" {
   //}
 
   //depends_on = [aws_s3_bucket.fargate]
+  tags = {
+    yor_trace = "db047579-5ca0-455f-8273-39e1d90be040"
+  }
 }
 
 resource "aws_alb_target_group" "fargate" {
@@ -132,6 +141,9 @@ resource "aws_alb_target_group" "fargate" {
     path     = var.health_check_path
     protocol = "HTTP"
   }
+  tags = {
+    yor_trace = "ad59fe9c-e054-4024-85ea-c2e345dcb5b3"
+  }
 }
 
 resource "aws_alb_listener" "fargate" {
@@ -145,6 +157,9 @@ resource "aws_alb_listener" "fargate" {
     target_group_arn = aws_alb_target_group.fargate[count.index].id
     type             = "forward"
   }
+  tags = {
+    yor_trace = "670be6e8-2655-4c32-9a45-e12c0570779f"
+  }
 }
 
 ##############################
@@ -156,17 +171,19 @@ resource "aws_eip" "ip" {
   vpc   = true
 
   tags = {
-    Name = "IP NAT Gateway ${var.env_name}-${var.app_name}"
+    Name      = "IP NAT Gateway ${var.env_name}-${var.app_name}"
+    yor_trace = "0380de11-b35a-44d5-9b6f-10bcbc332ad2"
   }
 }
 
 resource "aws_nat_gateway" "gw" {
   count         = local.nat_enabled ? var.az_count : 0
   allocation_id = aws_eip.ip[count.index].id
-  subnet_id     =  element(var.public_subnet_ids, count.index) 
+  subnet_id     = element(var.public_subnet_ids, count.index)
 
   tags = {
-    Name = "NAT Gateway ${var.env_name}-${var.app_name}"
+    Name      = "NAT Gateway ${var.env_name}-${var.app_name}"
+    yor_trace = "9d73813f-2390-4d34-86da-d263f17e88c4"
   }
 }
 
@@ -182,7 +199,10 @@ resource "aws_ecs_task_definition" "fargate" {
   execution_role_arn       = aws_iam_role.fargate_role.arn
   task_role_arn            = aws_iam_role.fargate_role.arn
 
-  container_definitions    = file("pc-defender-fargate.json")	 
+  container_definitions = file("pc-defender-fargate.json")
+  tags = {
+    yor_trace = "12df38b1-c5da-4c6e-a387-0b3ccc51dda6"
+  }
 }
 
 resource "aws_ecs_cluster" "fargate" {
@@ -191,6 +211,9 @@ resource "aws_ecs_cluster" "fargate" {
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
   default_capacity_provider_strategy {
     capacity_provider = var.capacity_provider
+  }
+  tags = {
+    yor_trace = "a4f06737-73fe-41ce-8370-69503b17da7b"
   }
 }
 
@@ -202,7 +225,7 @@ resource "aws_ecs_service" "fargate" {
     aws_alb_target_group.fargate,
     aws_alb.fargate
   ]
-  count             = local.nat_enabled ? 0 : 1
+  count                              = local.nat_enabled ? 0 : 1
   name                               = "${var.env_name}-${var.app_name}-service"
   cluster                            = aws_ecs_cluster.fargate.id
   task_definition                    = aws_ecs_task_definition.fargate.arn
@@ -218,13 +241,16 @@ resource "aws_ecs_service" "fargate" {
   network_configuration {
     assign_public_ip = true
     security_groups  = [aws_security_group.fargate_ecs.id]
-    subnets          = var.private_subnet_ids 
+    subnets          = var.private_subnet_ids
   }
 
   load_balancer {
-      target_group_arn = aws_alb_target_group.fargate[count.index].id
-      container_name   = "${var.env_name}-${var.app_name}"
-      container_port   = var.container_port
+    target_group_arn = aws_alb_target_group.fargate[count.index].id
+    container_name   = "${var.env_name}-${var.app_name}"
+    container_port   = var.container_port
+  }
+  tags = {
+    yor_trace = "4dc1ed7c-5572-4b45-8bcc-21f82dcbca63"
   }
 }
 
