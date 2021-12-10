@@ -60,6 +60,9 @@ resource "aws_iam_policy" "fargate_log_publishing" {
   description = "Allow publishing to cloudwach"
 
   policy = data.aws_iam_policy_document.log_publishing.json
+  tags = {
+    yor_trace = "a09299c5-e2f7-453e-bce2-9d6b828782a2"
+  }
 }
 
 data "aws_iam_policy_document" "fargate_assume_role_policy" {
@@ -77,6 +80,9 @@ resource "aws_iam_role" "fargate_role" {
   name               = "${var.env_name}-${var.app_name}-role"
   path               = "/system/"
   assume_role_policy = data.aws_iam_policy_document.fargate_assume_role_policy.json
+  tags = {
+    yor_trace = "b1218480-7f83-4d8a-8c40-abc91c9b56bc"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "fargate_role_log_publishing" {
